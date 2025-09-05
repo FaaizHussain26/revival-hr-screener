@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, UserCheck, UserX, Briefcase } from "lucide-react";
+import { Briefcase, Calendar, User, LucideArrowBigUpDash } from "lucide-react";
 
 interface DashboardStats {
   totalJob: number;
@@ -49,33 +49,32 @@ export default function MetricsOverview({
     );
   }
 
-  const totalCandidates =
-    (stats?.totalInactiveCandidates || 0) +
-    (stats?.countInterviewsThisWeek || 0);
-  const activeCandidates = stats?.countInterviewsThisWeek || 0;
-  const inactiveCandidates = stats?.totalInactiveCandidates || 0;
-  const openPositions = stats?.totalJob || 0;
+  const totalJobs = stats?.totalJob || 0;
+
+  const totalInactiveCandidates = stats?.totalInactiveCandidates || 0;
+  const countInterviewsThisWeek = stats?.countInterviewsThisWeek || 0;
+  const hiringRate = Number(stats?.hiringRate || 0).toFixed(0);
 
   const metrics = [
     {
-      title: "Total Candidates",
-      value: totalCandidates,
-      icon: Users,
-    },
-    {
-      title: "Active",
-      value: activeCandidates,
-      icon: UserCheck,
-    },
-    {
-      title: "Inactive",
-      value: inactiveCandidates,
-      icon: UserX,
-    },
-    {
-      title: "Open Positions",
-      value: openPositions,
+      title: "Total Jobs",
+      value: totalJobs,
       icon: Briefcase,
+    },
+    {
+      title: "Active Candidates",
+      value: totalInactiveCandidates,
+      icon: User,
+    },
+    {
+      title: "Interviews This Week",
+      value: countInterviewsThisWeek,
+      icon: Calendar,
+    },
+    {
+      title: "Hiring Rate",
+      value: hiringRate,
+      icon: LucideArrowBigUpDash,
     },
   ];
 
@@ -95,7 +94,9 @@ export default function MetricsOverview({
                     {metric.title}
                   </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {metric.value}
+                    {metric.value === hiringRate
+                      ? metric.value + "%"
+                      : metric.value}
                   </p>
                 </div>
               </div>

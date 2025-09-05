@@ -2,7 +2,6 @@
 
 import { Candidate, insertInterviewSchema, Interview } from "../schema";
 
-
 // Dummy in-memory storage
 const dummyCandidates: Candidate[] = [
   {
@@ -82,7 +81,9 @@ export async function apiRequest(
         id: i.id,
         title: `Interview with ${i.candidateId}`,
         start: i.scheduledAt,
-        end: new Date(new Date(i.scheduledAt).getTime() + (i.duration ?? 60) * 60000).toISOString(),
+        end: new Date(
+          new Date(i.scheduledAt).getTime() + (i.duration ?? 60) * 60000
+        ).toISOString(),
       }));
     }
   }

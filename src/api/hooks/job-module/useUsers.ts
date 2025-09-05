@@ -1,3 +1,4 @@
+import { deleteUser, getUsers } from "@/api/requests/users-api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -33,19 +34,10 @@ export interface UsersQueryParams {
 export const useUsers = (params: UsersQueryParams = {}) => {
   return useQuery({
     queryKey: ["users", params],
-    queryFn: async (): Promise<UsersResponse> => {
-      const searchParams = new URLSearchParams();
-      if (params.page) searchParams.append("page", params.page.toString());
-      if (params.limit) searchParams.append("limit", params.limit.toString());
-      if (params.search) searchParams.append("search", params.search);
-      if (params.role) searchParams.append("role", params.role);
-      if (params.isActive !== undefined)
-        searchParams.append("isActive", params.isActive.toString());
-
-      const response = await fetch(`/api/users?${searchParams.toString()}`);
-      if (!response.ok) throw new Error("Failed to fetch users");
-      return response.json();
-    },
+    queryFn: () => getUsers(params),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -54,13 +46,7 @@ export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (userId: string) => {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Failed to delete user");
-      return response.json();
-    },
+    mutationFn: deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("User deleted successfully");

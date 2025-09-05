@@ -39,7 +39,10 @@ export const fetchCandidates = async (): Promise<Candidate[]> => {
 };
 
 // Update candidate status
-export const updateCandidateStatus = async (candidateId: string, newStatus: string) => {
+export const updateCandidateStatus = async (
+  candidateId: string,
+  newStatus: string
+) => {
   const candidate = dummyCandidates.find((c) => c.id === candidateId);
   if (candidate) candidate.status = newStatus;
   return candidate;

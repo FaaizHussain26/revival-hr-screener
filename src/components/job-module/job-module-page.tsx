@@ -6,7 +6,6 @@ import {
   FilePlus,
   Eye,
   Trash2,
-  AlertCircle,
   Search,
   Briefcase,
   RotateCcw,
@@ -14,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -36,107 +35,11 @@ import { Job } from "@/api/requests/job-module-api";
 import { DeleteConfirmationModal } from "./modals/delete-confirmation-modal";
 import { ViewJobModal } from "./modals/view-job-modal";
 import { RenderPagination } from "./pagination-job";
+import { EmptyState, ErrorState, TableSkeleton } from "../Table";
 
 const ITEMS_PER_PAGE = 7;
 
-// Skeleton Components
-function TableRowSkeleton() {
-  return (
-    <TableRow>
-      <TableCell className="text-left">
-        <Skeleton className="h-4 w-32" />
-      </TableCell>
-      <TableCell className="text-center">
-        <Skeleton className="h-4 w-20" />
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="flex flex-wrap gap-1 justify-center">
-          <Skeleton className="h-6 w-16 rounded-full" />
-          <Skeleton className="h-6 w-20 rounded-full" />
-          <Skeleton className="h-6 w-18 rounded-full" />
-        </div>
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="flex justify-center gap-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function TableSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <TableRowSkeleton key={index} />
-      ))}
-    </>
-  );
-}
-
-// Empty State Component
-function EmptyState({
-  title,
-  description,
-  icon: Icon = Briefcase,
-}: {
-  title: string;
-  description: string;
-  icon?: React.ElementType;
-}) {
-  return (
-    <TableRow>
-      <TableCell colSpan={4} className="text-center py-12">
-        <div className="flex flex-col items-center gap-4">
-          <div className="rounded-full bg-muted p-4">
-            <Icon className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">{title}</h3>
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              {description}
-            </p>
-          </div>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-// Error State Component
-function ErrorState({ error }: { error: unknown }) {
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
-      <Card className="border-destructive/50">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-medium text-destructive">
-                Error Loading Jobs
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {error instanceof Error
-                  ? error.message
-                  : "An unexpected error occurred"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-export function JobModulePage({
-  disablePagination,
-}: {
-  disablePagination?: boolean;
-}) {
+export function JobModulePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [jobToDelete, setJobToDelete] = useState<Job | null>(null);
@@ -164,7 +67,11 @@ export function JobModulePage({
   const restoreJobMutation = useRestoreJob();
 
   const jobs: Job[] = jobsResponse?.data || [];
-  const lastPages = jobsResponse?.last_page || 1;
+
+  const totalCount = jobsResponse?.pagination.total ?? 0;
+  const totalPages = Math.ceil(
+    (jobsResponse?.pagination.total ?? 0) / ITEMS_PER_PAGE
+  );
 
   // const totalPages = jobsResponse?.last_page || 1;
   // const totalItems = jobsResponse?.total || 0;
@@ -347,7 +254,7 @@ export function JobModulePage({
         <CardContent className="p-0">
           <div className="overflow-x-auto ">
             <Table>
-              <TableHeader className="bg-muted/50">
+              <TableHeader className="">
                 <TableRow className="">
                   <TableHead className="font-semibold text-left w-1/3 pl-10 ">
                     Job Title
@@ -366,18 +273,26 @@ export function JobModulePage({
               <TableBody>{renderJobRows(jobs)}</TableBody>
             </Table>
           </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between space-x-2 py-4 pl-10 pr-10">
+              <div className="text-sm text-muted-foreground">
+                Showing{" "}
+                {jobs.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
+                to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of{" "}
+                {totalCount} users
+              </div>
+              <RenderPagination
+                currentPage={currentPage}
+                lastPages={totalPages}
+                handlePageChange={handlePageChange}
+                ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Pagination */}
-      {!isLoading && jobs.length > 0 && !disablePagination && (
-        <RenderPagination
-          lastPages={lastPages}
-          currentPage={currentPage}
-          handlePageChange={handlePageChange}
-          ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-        />
-      )}
       {/* Modals */}
       <CreateJobModal isOpen={isModalOpen} onClose={handleCloseModal} />
 

@@ -9,15 +9,12 @@ import { TodaysScheduleCard } from "@/components/calender/today-schedule-card";
 
 import { useGetTodaysInterviews } from "@/api/hooks/useCalender";
 import type { Interview } from "@/api/requests/calender-api";
-
-const mockStats = {
-  totalJob: 7,
-  totalInactiveCandidates: 2,
-  countInterviewsThisWeek: 3,
-  hiringRate: "50.00",
-};
+import { useDashboardStats } from "@/api/hooks/useDashboardStats";
 
 export default function Dashboard() {
+  const { data } = useDashboardStats();
+  const stats = data;
+
   const { data: todaysInterviewsResponse, isLoading: todaysInterviewsLoading } =
     useGetTodaysInterviews();
   const todaysInterviews: Interview[] = todaysInterviewsResponse?.data || [];
@@ -29,7 +26,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <MetricsOverview stats={mockStats} />
+      <MetricsOverview stats={stats} />
 
       <div className="grid grid-cols-1  gap-6">
         <div className="xl:col-span-2">

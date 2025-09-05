@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import {
   Table,
   TableBody,
@@ -25,7 +25,6 @@ import {
   Filter,
   Search,
   Trash2,
-  AlertCircle,
   Users,
   UserX,
   UserCheck,
@@ -37,6 +36,7 @@ import DashboardCard from "../dashboard/dashboard-card";
 import { RenderPagination } from "./pagination";
 import { DeleteConfirmationModal } from "../modals/delete-confirmation";
 import { ViewCandidateDetailModal } from "./view-details";
+import { EmptyState, ErrorState, TableSkeleton } from "../Table";
 
 export interface ShortListedCandidate {
   _id: string;
@@ -66,102 +66,9 @@ export interface ShortListedCandidate {
   status?: string;
 }
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 7;
 
 // Skeleton Components
-function TableRowSkeleton() {
-  return (
-    <TableRow>
-      <TableCell className="text-left pl-10">
-        <Skeleton className="h-4 w-32" />
-      </TableCell>
-      <TableCell className="text-center">
-        <Skeleton className="h-6 w-16 mx-auto rounded-full" />
-      </TableCell>
-      <TableCell className="text-center">
-        <Skeleton className="h-4 w-20 mx-auto" />
-      </TableCell>
-      <TableCell className="text-center">
-        <Skeleton className="h-6 w-12 mx-auto rounded-full" />
-      </TableCell>
-      <TableCell className="text-center">
-        <Skeleton className="h-6 w-16 mx-auto rounded-full" />
-      </TableCell>
-      <TableCell className="text-center">
-        <div className="flex justify-center gap-2">
-          <Skeleton className="h-4 w-4" />
-          <Skeleton className="h-4 w-4" />
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-function TableSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <TableRowSkeleton key={index} />
-      ))}
-    </>
-  );
-}
-
-// Empty State Component
-function EmptyState({
-  title,
-  description,
-  icon: Icon = Users,
-}: {
-  title: string;
-  description: string;
-  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
-}) {
-  return (
-    <TableRow>
-      <TableCell colSpan={6} className="text-center py-12">
-        <div className="flex flex-col items-center gap-4">
-          <div className="rounded-full bg-muted p-4">
-            <Icon className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium">{title}</h3>
-            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              {description}
-            </p>
-          </div>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-// Error State Component
-function ErrorState({ error }: { error: unknown }) {
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4">
-      <Card className="border-destructive/50">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="rounded-full bg-destructive/10 p-3">
-              <AlertCircle className="h-6 w-6 text-destructive" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-medium text-destructive">
-                Error Loading Candidates
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {error instanceof Error
-                  ? error.message
-                  : "An unexpected error occurred"}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 
 export function ShortlistedCandidatesPage({
   limit,
@@ -242,7 +149,12 @@ export function ShortlistedCandidatesPage({
     }
   );
 
-  const lastPages = shortListedCandidates?.last_page || 1;
+  // const lastPages = shortListedCandidates?.last_page || 1;
+
+  const totalCount = shortListedCandidates?.pagination.total ?? 0;
+  const totalPages = Math.ceil(
+    (shortListedCandidates?.pagination.total ?? 0) / ITEMS_PER_PAGE
+  );
 
   const handlePageChange = (page: number) => setCurrentPage(page);
 
@@ -530,7 +442,7 @@ export function ShortlistedCandidatesPage({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50">
+                <TableRow>
                   <TableHead className="text-left pl-10 font-semibold">
                     {shortlistCandidateData.tableColumn.tableColumnOne}
                   </TableHead>
@@ -553,18 +465,28 @@ export function ShortlistedCandidatesPage({
               </TableHeader>
               <TableBody>{renderCandidateRows(filteredCandidates)}</TableBody>
             </Table>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between space-x-2 py-4 pl-10 pr-10">
+                <div className="text-sm text-muted-foreground">
+                  Showing{" "}
+                  {allCandidates.length === 0
+                    ? 0
+                    : (currentPage - 1) * ITEMS_PER_PAGE + 1}{" "}
+                  to {Math.min(currentPage * ITEMS_PER_PAGE, totalCount)} of{" "}
+                  {totalCount} users
+                </div>
+                <RenderPagination
+                  currentPage={currentPage}
+                  lastPages={totalPages}
+                  handlePageChange={handlePageChange}
+                  ITEMS_PER_PAGE={ITEMS_PER_PAGE}
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
-
-      {!isLoading && allCandidates.length > 0 && !disablePagination && (
-        <RenderPagination
-          lastPages={lastPages}
-          currentPage={currentPage}
-          handlePageChange={handlePageChange}
-          ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-        />
-      )}
 
       <DeleteConfirmationModal
         open={!!candidateToDelete}

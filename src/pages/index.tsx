@@ -9,13 +9,14 @@ import RegisterPage from "./register";
 import { ResetPassword } from "./reset-password";
 import { SettingsPage } from "./settings";
 import JobModule from "./job-module";
-import { UsersPage } from "./users";
+
 import ShorlistCandidates from "./shortlisted-candidates";
 import Dashboard from "./dashboard";
 import { ResumeAnalyzer } from "./resume-analyzer";
 import ResumeAnalysisPage from "./resume-analysis-page";
 import Pipeline from "./pipeline";
 import CalendarPage from "./calendar";
+import UserHome from "./users";
 
 export default function Main() {
   return (
@@ -86,7 +87,7 @@ export default function Main() {
         <Route path="hiring-pipeline" element={<Pipeline />} />
         <Route path="interview-calendar" element={<CalendarPage />} />
 
-        <Route path="users" element={<UsersPage />} />
+        <Route path="users" element={<UserHome />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

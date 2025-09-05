@@ -36,10 +36,12 @@ export interface JobsResponse {
   success: boolean;
   message: string;
   data: Job[];
-  total?: number;
-  current_page?: number;
-  last_page?: number;
-  per_page?: number;
+  pagination: {
+    total?: number;
+    current_page?: number;
+    last_page?: number;
+    per_page?: number;
+  };
 }
 
 export interface Skill {
