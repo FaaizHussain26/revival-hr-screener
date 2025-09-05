@@ -1,0 +1,9 @@
+:root {
+  --card-box: linear-gradient(
+    90deg,
+    #3b82f6 0%,
+    #1e40af 100%
+  ); /* blue gradient */
+  --sidebar-accent-foreground: #1e40af; /* deep blue */
+  --sidebar-accent-active: #3b82f6; /* lighter blue */
+}
