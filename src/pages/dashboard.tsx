@@ -23,9 +23,8 @@ export default function Dashboard() {
   const todaysInterviews: Interview[] = todaysInterviewsResponse?.data || [];
 
   const handleUpdateClick = (interview: Interview, e: React.MouseEvent) => {
-    // Implement update logic or modal opening here
+    console.log(interview);
     e.stopPropagation();
-    // Example: open update modal, set selected interview, etc.
   };
 
   return (
@@ -53,7 +52,9 @@ export default function Dashboard() {
               getCandidateName={(candidate: { applicant_name: string }) =>
                 candidate.applicant_name
               }
-              handleUpdateClick={handleUpdateClick}
+              handleUpdateClick={(interview: Interview, e: React.MouseEvent) =>
+                handleUpdateClick(interview, e)
+              }
             />
           </div>
         </div>

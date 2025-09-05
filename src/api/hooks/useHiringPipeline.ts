@@ -91,7 +91,7 @@ export function useHiringPipeline() {
 
       return { previousStages };
     },
-    onError: (err, variables, context) => {
+    onError: (_, __, context) => {
       // Rollback on error
       if (context?.previousStages) {
         queryClient.setQueryData(
